@@ -179,6 +179,11 @@ func (l *Logger) handleError(err error) {
 	}
 }
 
+// WritePacket allow exported method for writePacket
+func (l *Logger) WritePacket(p Packet) {
+	l.writePacket(p)
+}
+
 // Write a packet, reconnecting if needed. It is not safe to call this
 // method concurrently.
 func (l *Logger) writePacket(p Packet) {
