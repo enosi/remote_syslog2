@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/papertrail/remote_syslog2/papertrail"
 	"github.com/papertrail/remote_syslog2/syslog"
 	"github.com/papertrail/remote_syslog2/utils"
 	"github.com/spf13/pflag"
@@ -58,6 +57,7 @@ type Config struct {
 		Host     string
 		Port     int
 		Protocol string
+		Token    string
 	}
 	RootCAs *x509.CertPool
 }
@@ -97,6 +97,9 @@ func initConfigAndFlags() {
 
 	flags.IntP("dest-port", "p", 514, "Destination syslog port")
 	config.BindPFlag("destination.port", flags.Lookup("dest-port"))
+
+	flags.StringP("dest-token", "t", "", "Destination ingestion token")
+	config.BindPFlag("destination.token", flags.Lookup("dest-token"))
 
 	flags.StringP("facility", "f", "user", "Facility")
 	config.BindPFlag("facility", flags.Lookup("facility"))
@@ -170,7 +173,7 @@ func NewConfigFromEnv() (*Config, error) {
 
 	// override daemonize setting for platforms that don't support it
 	if !utils.CanDaemonize {
-		config.Set("no_daemonize", true)
+		config.Set("no_detach", true)
 	}
 
 	// unmarshal environment config into our Config object here
@@ -191,6 +194,7 @@ func NewConfigFromEnv() (*Config, error) {
 	c.Destination.Host = config.GetString("destination.host")
 	c.Destination.Port = config.GetInt("destination.port")
 	c.Destination.Protocol = config.GetString("destination.protocol")
+	c.Destination.Token = config.GetString("destination.token")
 
 	// explicitly set destination protocol if we've asked for tcp or tls
 	if c.TLS {
@@ -198,11 +202,6 @@ func NewConfigFromEnv() (*Config, error) {
 	}
 	if c.TCP {
 		c.Destination.Protocol = "tcp"
-	}
-
-	// add the papertrail root CA if necessary
-	if c.Destination.Protocol == "tls" && c.Destination.Host == "logs.papertrailapp.com" {
-		c.RootCAs = papertrail.RootCA()
 	}
 
 	// figure out where to create a pidfile if none was configured
