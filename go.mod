@@ -1,6 +1,6 @@
 module github.com/papertrail/remote_syslog2
 
-go 1.17
+go 1.26.10
 
 require (
 	github.com/VividCortex/godaemon v1.0.0

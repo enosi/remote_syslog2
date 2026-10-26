@@ -255,7 +255,7 @@ func (s *testSyslogServer) serve() {
 						continue
 					}
 
-					fmt.Printf(line)
+					fmt.Print(line)
 					packet, err := syslog.Parse(strings.TrimRight(line, "\n"))
 					if err != nil {
 						panic(err)
